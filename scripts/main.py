@@ -62,6 +62,7 @@ def main():
       print(key, value)
   else:
     print('Файлы не найдены.')
+    list_all_files()
 
 if __name__ == '__main__':
   main()
