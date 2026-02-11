@@ -1,0 +1,8 @@
+# Какие папки сортировать
+watch_folder: "E:/work/AllProjects/File-Organizer/test/test_folder"
+
+# Редим предпросмотра: true = только смотрим, false = реально перемещаем
+dry_run: true
+
+# Куда складывать отсортированное
+output_base: "E:/work/AllProjects/File-Organizer/test/test_folder/sorted"
