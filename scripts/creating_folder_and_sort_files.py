@@ -1,13 +1,14 @@
 from pathlib import Path
 import shutil
-import main
-from categories import FILE_CATEGORIES
-import yaml
-import creating_config_file
+import loading_config_files
 
 
-def creating_folders_and_sort_files():
-  path = main.find_folder_path()
+CONFIG_SETTINGS = loading_config_files.load_config_settings()
+CONFIG_CATEGORIES = loading_config_files.load_config_categories()
+
+
+def creating_folders_and_sort_files(config_set, config_categor):
+  path = Path(config_set.get("watch_folder"))
   recursively = int(input('Произвести сортировку всех вложенных папок (1/0): '))
   if not recursively:
     list_files = regular_sort(path)
@@ -17,7 +18,11 @@ def creating_folders_and_sort_files():
   for file in list_files:
     str_file = Path(file)
     extension = str_file.suffix
-    folder_name = search_folder_name(extension)
+    folder_name = get_category_name(config_categor, extension)
+    if folder_name is None:
+      print(f'Для расширеня {extension} не найдена категория')
+      folder_name = "other"
+    
     result_path = path / folder_name
     
     if not result_path.is_dir():
@@ -25,13 +30,14 @@ def creating_folders_and_sort_files():
     
     source = path / file
     shutil.move(source, result_path)
-  
-  print('Файлы отсортированны')
 
-def search_folder_name(extension):
-  for name_folder, extension_list in FILE_CATEGORIES.items():
-    if extension in extension_list:
-      return name_folder
+def get_category_name(config, target_ext):
+  for rule in config.get('rules', []):
+    if target_ext in rule.get('extension', []):
+      return rule.get('category')
+  
+  return None
+
 
 def regular_sort(path):
   if path:
@@ -71,6 +77,9 @@ def recursive_sort(path):
   return result_file
 
 def deleting_folders(path, name_folders):
+  if len(name_folders) <= 0:
+    return None
+  
   print(f'Список отсортированных папок: {name_folders}')
   del_folder = int(input('Хотите ли вы удалить папки (1/0): '))
   
@@ -86,58 +95,4 @@ def deleting_folders(path, name_folders):
   else:
     return None
 
-
-
-def load_config_settings():
-  config_path = Path(__file__).parent.parent / "config" / "settings.yaml"
-  
-  if not config_path.exists():
-    creating_config_file.create_def_conf(config_path)
-    return change_config()
-  
-  with open(config_path, 'r') as f:
-    config = yaml.safe_load(f)
-    return config
-
-def change_config():
-  print('Создан дефолтный конфиг файл.')
-  print('Измените конфиг файл под свои нужды и заново запустите программу.')
-  exit()
-
-def load_config_categories():
-  config_path = Path(__file__).parent.parent / "config" / "categories.yaml"
-  
-  with open(config_path, 'r') as f:
-    config = yaml.safe_load(f)
-    return config
-
-
-def creating_folders_and_sort_files():
-  config = load_config_settings()
-  
-  path = Path(config.get("watch_folder"))
-  recursively = int(input('Произвести сортировку всех вложенных папок (1/0): '))
-  
-  if not recursively:
-    list_files = regular_sort(path)
-  else:
-    list_files = recursive_sort(path)
-  
-  for file in list_files:
-    str_file = Path(file)
-    extension = str_file.suffix
-    folder_name = search_folder_name(extension)
-    result_path = path / folder_name
-    
-    if not result_path.is_dir():
-      result_path.mkdir(parents=True, exist_ok=True)
-    
-    source = path / file
-    shutil.move(source, result_path)
-
-def get_category_name(config, target_ext):
-  for rule in config.get('rules', []):
-    if target_ext in rule.get('extension', []):
-      return rule.get('category')
-  
-  return None
+creating_folders_and_sort_files(CONFIG_SETTINGS, CONFIG_CATEGORIES)
