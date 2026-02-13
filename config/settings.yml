@@ -6,3 +6,6 @@ dry_run: true
 
 # Куда складывать отсортированное
 output_base: "E:/work/All_Projects/File-OrganizerNew/test/test_folder/sorted"
+
+# Удаление отсортированных папок: true - да, false - нет
+deleting_folders: true

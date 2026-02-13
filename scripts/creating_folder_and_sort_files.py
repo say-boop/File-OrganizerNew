@@ -11,11 +11,11 @@ def creating_folders_and_sort_files(config_set, config_categor):
   path = Path(config_set.get("watch_folder"))
   recursively = int(input('Произвести сортировку всех вложенных папок (1/0): '))
   if not recursively:
-    list_files = regular_sort(path)
+    regular_sort(path)
   else:
-    list_files = recursive_sort(path)
+    recursive_sort(path)
   
-  for file in list_files:
+  for file in path.iterdir():
     str_file = Path(file)
     extension = str_file.suffix
     folder_name = get_category_name(config_categor, extension)
@@ -40,54 +40,60 @@ def get_category_name(config, target_ext):
 
 
 def regular_sort(path):
-  if path:
-    list_files = [item.name for item in path.iterdir() if item.is_file()]
-  else:
+  if not path:
     print('Папка не найдена, проверьте корректность ввода')
     creating_folders_and_sort_files()
-  
-  return list_files
+
+def check_and_move(file_path, target_dir):
+    file_path = Path(file_path)
+    target_dir = Path(target_dir)
+    
+    final_path = target_dir / file_path.name
+    
+    if file_path.parent == target_dir and file_path.name == final_path.name:
+        return file_path
+
+    if final_path.exists():
+        count = 1
+        while final_path.exists():
+            new_name = f"{file_path.stem}_{count}{file_path.suffix}"
+            final_path = target_dir / new_name
+            count += 1
+            
+    target_dir.mkdir(parents=True, exist_ok=True)
+    return shutil.move(str(file_path), str(final_path))
 
 def recursive_sort(path):
-  result_file = []
-  name_folders = []
-  if path:
-    list_files_folders = [item.name for item in path.iterdir()]
-  else:
-    print('Папка не найдена, проверьте корректность ввода')
-    creating_folders_and_sort_files()
+  base_path = Path(path)
+  if not base_path.exists():
+    print("Папка не найдена")
+    return
   
-  for item in list_files_folders:
-    str_file = Path(item)
+  all_files = [f for f in base_path.rglob('*') if f.is_file()]
+  
+  for file in all_files:
+    check_and_move(file, base_path)
     
-    if not str_file.suffix:
-      path_dir = path / item
-      name_folders.append(item)
-      
-      list_nested_files = [file.name for file in path_dir.iterdir()]
-      for file in path_dir.iterdir():
-        source = path_dir / file
-        shutil.move(source, path)
-      result_file.extend(list_nested_files)
-    else:
-      result_file.append(item)
-  
-  deleting_folders(path, name_folders)
-  
-  return result_file
+  if CONFIG_SETTINGS.get("deleting_folders"):
+    for subfolder in sorted([d for d in base_path.iterdir() if d.is_dir()], reverse=True):
+      try:
+        shutil.rmtree(subfolder)
+      except Exception as e:
+        print(f"Не удалось удалить {subfolder}: {e}")
+    
+  return all_files
 
 def deleting_folders(path, name_folders):
   if len(name_folders) <= 0:
     return None
   
-  print(f'Список отсортированных папок: {name_folders}')
-  del_folder = int(input('Хотите ли вы удалить папки (1/0): '))
+  del_folder = CONFIG_SETTINGS.get("deleting_folders")
   
   if del_folder:
     for folder in name_folders:
       path_dir = path / folder
       if any(path_dir.iterdir()):
-        delete_with_files = int(input('В папке есть файлы, всё равно удалить? (1/0): '))
+        delete_with_files = int(input(f'В папке есть файлы, всё равно удалить? (1/0): '))
         if delete_with_files:
           shutil.rmtree(path_dir)
       else:
