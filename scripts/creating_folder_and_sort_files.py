@@ -83,22 +83,4 @@ def recursive_sort(path):
     
   return all_files
 
-def deleting_folders(path, name_folders):
-  if len(name_folders) <= 0:
-    return None
-  
-  del_folder = CONFIG_SETTINGS.get("deleting_folders")
-  
-  if del_folder:
-    for folder in name_folders:
-      path_dir = path / folder
-      if any(path_dir.iterdir()):
-        delete_with_files = int(input(f'В папке есть файлы, всё равно удалить? (1/0): '))
-        if delete_with_files:
-          shutil.rmtree(path_dir)
-      else:
-        shutil.rmtree(path_dir)
-  else:
-    return None
-
 creating_folders_and_sort_files(CONFIG_SETTINGS, CONFIG_CATEGORIES)
