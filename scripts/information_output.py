@@ -1,9 +1,54 @@
-import main
+from pathlib import Path
+import loading_config_files
 
-LIST_ALL_FILES = main.list_all_files()
-COUNT_FILES_TYPE = main.counting_files_type(LIST_ALL_FILES)
+CONFIG_SETTINGS = loading_config_files.load_config_settings()
+CONFIG_CATEGORIES = loading_config_files.load_config_categories()
 
 
+def list_all_files():
+  directory = Path(CONFIG_SETTINGS.get("watch_folder"))
+  if directory:
+    all_items = [child.name for child in directory.iterdir()]
+  else:
+    print('Папка не найден, проверьте корректность ввода.')
+    list_all_files()
+  
+  files_only = []
+  
+  for item in all_items:
+    full_path = directory / item
+    if Path.is_file(full_path):
+      files_only.append(item)
+  
+  return files_only
+
+def counting_files_type(lst_files: list) -> dict:
+  count_files = {}
+  
+  for file in lst_files:
+    str_file = Path(file)
+    extension = str_file.suffix
+    
+    if extension:
+      name_categories = get_category_name(CONFIG_CATEGORIES, extension)
+      
+      if name_categories not in count_files:
+        count_files[name_categories] = {}
+      
+      if extension not in count_files[name_categories]:
+        count_files[name_categories][extension] = 0
+      count_files[name_categories][extension] += 1
+  
+  return count_files
+
+def get_category_name(config, target_ext):
+  for rule in config.get('rules', []):
+    if target_ext in rule.get('extension', []):
+      return rule.get('category')
+  
+  return None
+
+COUNT_FILES_TYPE = counting_files_type(list_all_files())
 
 def dict_of_file_endings(folder_name: str, value_content: int):
   dict_file_endings = {
