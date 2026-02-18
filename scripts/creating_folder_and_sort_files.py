@@ -1,7 +1,10 @@
 from pathlib import Path
 import shutil
 import loading_config_files
+from logging_manager import LoggingManager
 
+logger_ERROR = LoggingManager.get_logger('error_logger')
+logger_INFO = LoggingManager.get_logger('only_info_console_logger')
 
 CONFIG_SETTINGS = loading_config_files.load_config_settings()
 CONFIG_CATEGORIES = loading_config_files.load_config_categories()
@@ -9,18 +12,23 @@ CONFIG_CATEGORIES = loading_config_files.load_config_categories()
 
 def creating_folders_and_sort_files(config_set, config_categor):
   path = Path(config_set.get("watch_folder"))
+  if not path:
+    logger_ERROR.error('The path is incorrect, check the configuration file, field "watch_folder"')
+  
   recursively = int(input('Произвести сортировку всех вложенных папок (1/0): '))
   if not recursively:
     regular_sort(path)
+    logger_INFO.info('Routine sorting was carried out')
   else:
     recursive_sort(path)
+    logger_INFO.info('Recursive sorting was performed')
   
   for file in path.iterdir():
     str_file = Path(file)
     extension = str_file.suffix
     folder_name = get_category_name(config_categor, extension)
     if folder_name is None:
-      print(f'Для расширеня {extension} не найдена категория')
+      logger_INFO.info(f'Category not found for {extension} extension')
       folder_name = "other"
     
     result_path = path / folder_name
@@ -36,12 +44,13 @@ def get_category_name(config, target_ext):
     if target_ext in rule.get('extension', []):
       return rule.get('category')
   
+  logger_INFO.warning('No category found for this extension.')
   return None
 
 
 def regular_sort(path):
   if not path:
-    print('Папка не найдена, проверьте корректность ввода')
+    logger_ERROR.error('Folder not found, please check your input')
     creating_folders_and_sort_files()
 
 def check_and_move(file_path, target_dir):
@@ -66,10 +75,14 @@ def check_and_move(file_path, target_dir):
 def recursive_sort(path):
   base_path = Path(path)
   if not base_path.exists():
-    print("Папка не найдена")
+    logger_ERROR.error('Folder not found, check the configuration file to see if the path is correct')
     return
   
   all_files = [f for f in base_path.rglob('*') if f.is_file()]
+  
+  if len(all_files) == 0:
+    logger_ERROR.error('There are no files to sort in the folder, check the path')
+    return
   
   for file in all_files:
     check_and_move(file, base_path)
@@ -79,7 +92,7 @@ def recursive_sort(path):
       try:
         shutil.rmtree(subfolder)
       except Exception as e:
-        print(f"Не удалось удалить {subfolder}: {e}")
+        logger_INFO.info(f'failed to delete {subfolder}: {e}')
     
   return all_files
 

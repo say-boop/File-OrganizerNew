@@ -1,3 +1,5 @@
+# В этом файле будет режим dry-run, пока его не делал, но в скоре возьмусь за него.
+
 from pathlib import Path
 import loading_config_files
 

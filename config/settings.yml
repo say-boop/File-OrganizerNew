@@ -1,5 +1,5 @@
 # Какие папки сортировать
-watch_folder: "E:/work/All_Projects/File-OrganizerNew/test/test_folder"
+watch_folder: "E:/work/All_Projects/File-OrganizerNew/test/test_folder2"
 
 # Редим предпросмотра: true = только смотрим, false = реально перемещаем
 dry_run: true

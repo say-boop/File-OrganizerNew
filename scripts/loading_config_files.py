@@ -2,13 +2,14 @@ from pathlib import Path
 import yaml
 from logging_manager import LoggingManager
 
-logger_INFO = LoggingManager.get_logger('all_info_logger')
+logger_ERROR = LoggingManager.get_logger('error_logger')
+logger_INFO = LoggingManager.get_logger('only_info_console_logger')
 
 def load_config_settings():
   config_path = Path(__file__).parent.parent / "config" / "settings.yml"
   
   if not config_path.exists():
-    logger_INFO.warning('Configuration file not found, default will be created')
+    logger_ERROR.warning('Configuration file not found, default will be created')
     create_def_conf(config_path)
     return change_config()
   
@@ -29,6 +30,7 @@ def load_config_categories():
   
   logger_INFO.info('Configuration file with categories found')
   
+  logger_INFO.info('Starting to download the config file')
   with open(config_path, 'r') as f:
     config = yaml.safe_load(f)
     logger_INFO.info('The category file has been uploaded')
