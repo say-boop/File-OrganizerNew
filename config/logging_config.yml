@@ -37,7 +37,7 @@ handlers:
 
 loggers:
   only_info_console_logger:
-    level: INFO
+    level: ERROR
     filters: [only_info]
     handlers: [console]
     propagate: false

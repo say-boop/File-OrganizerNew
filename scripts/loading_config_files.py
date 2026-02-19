@@ -36,6 +36,17 @@ def load_config_categories():
     logger_INFO.info('The category file has been uploaded')
     return config
 
+def load_config_reset():
+  config_path = Path(__file__).parent.parent / "config" / "recording_comp_actions.yml"
+  
+  logger_INFO.info('Configuration file with categories found')
+  
+  logger_INFO.info('Starting to download the config file')
+  with open(config_path, 'r') as f:
+    config = yaml.safe_load(f)
+    logger_INFO.info('The category file has been uploaded')
+    return config
+
 
 # Шаблон создания дефолтного конфиг файла
 def create_def_conf(config_path):
@@ -46,11 +57,11 @@ def create_def_conf(config_path):
 # Режим предпросмотра: true = только смотрим, false = реально перемещаем
 "dry_run": true
 
-# Куда складывать отсортированное
-"output_base": {str(Path.cwd())}
-
 # Удаление отсортированных папок: true - да, false - нет
 deleting_folders: true
+
+# Путь до yml файла для записи об выполненных действиях.
+recording_comp_actions: {str(Path.cwd())}
   """
   
   with open(config_path, 'w', encoding="utf-8") as f:

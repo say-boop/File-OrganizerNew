@@ -2,6 +2,8 @@ from pathlib import Path
 import shutil
 import loading_config_files
 from logging_manager import LoggingManager
+import obtaining_and_recording_data_about_files_for_rollback
+import math
 
 logger_ERROR = LoggingManager.get_logger('error_logger')
 logger_INFO = LoggingManager.get_logger('only_info_console_logger')
@@ -9,6 +11,7 @@ logger_INFO = LoggingManager.get_logger('only_info_console_logger')
 CONFIG_SETTINGS = loading_config_files.load_config_settings()
 CONFIG_CATEGORIES = loading_config_files.load_config_categories()
 
+obtaining_and_recording_data_about_files_for_rollback.check_file_presence_recording_comp_actions(CONFIG_SETTINGS)
 
 def creating_folders_and_sort_files(config_set, config_categor):
   path = Path(config_set.get("watch_folder"))
@@ -23,21 +26,32 @@ def creating_folders_and_sort_files(config_set, config_categor):
     recursive_sort(path)
     logger_INFO.info('Recursive sorting was performed')
   
-  for file in path.iterdir():
-    str_file = Path(file)
-    extension = str_file.suffix
-    folder_name = get_category_name(config_categor, extension)
-    if folder_name is None:
-      logger_INFO.info(f'Category not found for {extension} extension')
-      folder_name = "other"
+  len_path = len([file for file in path.iterdir()])
+  count = 0
+  
+  if len_path > 0:
+    for file in path.iterdir():
+      str_file = Path(file)
+      extension = str_file.suffix
+      folder_name = get_category_name(config_categor, extension)
+      if folder_name is None:
+        logger_INFO.info(f'Category not found for {extension} extension')
+        folder_name = "other"
     
-    result_path = path / folder_name
+      result_path = path / folder_name
+      result_path_filename = result_path / file
+      file_size = math.ceil(result_path_filename.stat().st_size / 1024)
     
-    if not result_path.is_dir():
-      result_path.mkdir(parents=True, exist_ok=True)
+      if not result_path.is_dir():
+        result_path.mkdir(parents=True, exist_ok=True)
     
-    source = path / file
-    shutil.move(source, result_path)
+      source = path / file
+      shutil.move(source, result_path)
+      obtaining_and_recording_data_about_files_for_rollback.get_path_to_and_file_size_after(result_path, file_size)
+      obtaining_and_recording_data_about_files_for_rollback.result_message(count)
+      count += 1
+  else:
+    logger_ERROR.error('No files found in the folder')
 
 def get_category_name(config, target_ext):
   for rule in config.get('rules', []):
@@ -52,10 +66,18 @@ def regular_sort(path):
   if not path:
     logger_ERROR.error('Folder not found, please check your input')
     creating_folders_and_sort_files()
+  
+  for file in path.iterdir():
+    obtaining_and_recording_data_about_files_for_rollback.get_filename(file.name)
+    file_size = math.ceil(file.stat().st_size / 1024)
+    obtaining_and_recording_data_about_files_for_rollback.get_path_from_and_file_size_before(file, file_size)
 
 def check_and_move(file_path, target_dir):
     file_path = Path(file_path)
     target_dir = Path(target_dir)
+    file_size = math.ceil(file_path.stat().st_size / 1024)
+    obtaining_and_recording_data_about_files_for_rollback.get_filename(file_path.name)
+    obtaining_and_recording_data_about_files_for_rollback.get_path_from_and_file_size_before(file_path, file_size)
     
     final_path = target_dir / file_path.name
     
@@ -67,6 +89,8 @@ def check_and_move(file_path, target_dir):
         while final_path.exists():
             new_name = f"{file_path.stem}_{count}{file_path.suffix}"
             final_path = target_dir / new_name
+            obtaining_and_recording_data_about_files_for_rollback.get_filename(new_name)
+            obtaining_and_recording_data_about_files_for_rollback.get_path_from_and_file_size_before(file_path, file_size)
             count += 1
             
     target_dir.mkdir(parents=True, exist_ok=True)
