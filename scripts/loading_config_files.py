@@ -15,7 +15,7 @@ def load_config_settings():
   
   logger_INFO.info('The config file has been found')
   logger_INFO.info('Starting to download the config file')
-  with open(config_path, 'r') as f:
+  with open(config_path, 'r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
     logger_INFO.info('File uploaded successfully, good job')
     return config
@@ -31,7 +31,7 @@ def load_config_categories():
   logger_INFO.info('Configuration file with categories found')
   
   logger_INFO.info('Starting to download the config file')
-  with open(config_path, 'r') as f:
+  with open(config_path, 'r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
     logger_INFO.info('The category file has been uploaded')
     return config
@@ -42,7 +42,7 @@ def load_config_reset():
   logger_INFO.info('Configuration file with categories found')
   
   logger_INFO.info('Starting to download the config file')
-  with open(config_path, 'r') as f:
+  with open(config_path, 'r', encoding='utf-8') as f:
     config = yaml.safe_load(f)
     logger_INFO.info('The category file has been uploaded')
     return config
