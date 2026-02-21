@@ -1,1 +1,18 @@
 file:
+  - filename: 'Microsoft Access База данных.accdb'
+    path_from: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Microsoft Access База данных.accdb'
+    path_to: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Database\Microsoft Access База данных.accdb'
+    file_size_before_KB: '484'
+    new_file_name: 'None'
+
+  - filename: 'Новый текстовый документ.txt'
+    path_from: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Новый текстовый документ.txt'
+    path_to: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Documents\Новый текстовый документ.txt'
+    file_size_before_KB: '0'
+    new_file_name: 'None'
+
+  - filename: 'Новый текстовый документ.txt'
+    path_from: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\nested_folder\Новый текстовый документ.txt'
+    path_to: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Documents\Новый текстовый документ_1.txt'
+    file_size_before_KB: '0'
+    new_file_name: 'Новый текстовый документ_1.txt'

@@ -116,4 +116,4 @@ def get_category_name(config, target_ext):
   return None
 
 
-regular_sort(path, CONFIG_CATEGORIES)
+recursive_sort(path)
