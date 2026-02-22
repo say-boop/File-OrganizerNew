@@ -3,7 +3,6 @@ import shutil
 import loading_config_files
 from logging_manager import LoggingManager
 import writing_data_to_yml
-import math
 
 
 logger_ERROR = LoggingManager.get_logger('error_logger')
@@ -26,7 +25,8 @@ def regular_sort(path, config_cat):
   if not path_dir:
     logger_ERROR.error('The path is incorrect, check the configuration file, field "watch_folder"')
   
-  for file in path.iterdir():
+  for path_file in path.iterdir():
+    file = Path(path_file)
     extension = file.suffix
     folder_name = get_category_name(config_cat, extension)
     
@@ -36,12 +36,13 @@ def regular_sort(path, config_cat):
     
     result_path = path_dir / folder_name
     final_path = result_path / file.name
-    file_size = math.ceil(file.stat().st_size / 1024)
+    file_size = file.stat().st_size
+    file_modification_time = file.stat().st_mtime
     
     if not result_path.is_dir():
       result_path.mkdir(parents=True, exist_ok=True)
     
-    writing_data_to_yml.result_message(file.name, file, final_path, "None", file_size)
+    writing_data_to_yml.result_message(file.name, file, final_path, "None", file_size, file_modification_time)
     
     shutil.move(file, final_path)
 
@@ -78,7 +79,8 @@ def check_and_move(path, file_path, config_cat):
   
   result_path = path_dir / folder_name
   final_path_filename = result_path / path_file.name
-  file_size = math.ceil(path_file.stat().st_size / 1024)
+  file_size = path_file.stat().st_size
+  file_modification_time = path_file.stat().st_mtime
   
   if final_path_filename.exists():
     count = 1
@@ -86,9 +88,9 @@ def check_and_move(path, file_path, config_cat):
       new_name = f"{path_file.stem}_{count}{path_file.suffix}"
       final_path_filename = result_path / new_name
       count += 1
-    writing_data_to_yml.result_message(path_file.name, path_file, final_path_filename, new_name, file_size)
+    writing_data_to_yml.result_message(path_file.name, path_file, final_path_filename, new_name, file_size, file_modification_time)
   else:
-    writing_data_to_yml.result_message(path_file.name, path_file, final_path_filename, "None", file_size)
+    writing_data_to_yml.result_message(path_file.name, path_file, final_path_filename, "None", file_size, file_modification_time)
   
   if not result_path.is_dir():
     result_path.mkdir(parents=True, exist_ok=True)

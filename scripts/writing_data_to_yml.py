@@ -30,13 +30,14 @@ def reading_conf_file(config_rec_comp_actions, message):
   with open(config_rec_comp_actions, 'a', encoding='utf-8') as f:
     f.write(message)
 
-def result_message(filename, path_from, path_to, new_name_after, file_size_before):
+def result_message(filename, path_from, path_to, new_name_after, file_size_before, file_modification_time):
   input_message = f"""
   - filename: '{filename}'
     path_from: '{path_from}'
     path_to: '{path_to}'
-    file_size_before_KB: '{file_size_before}'
+    file_size_before_B: '{file_size_before}'
     new_file_name: '{new_name_after}'
+    file_modification_time_before: '{file_modification_time}'
 """
   reading_conf_file(path_recording_comp_actions, input_message)
 
