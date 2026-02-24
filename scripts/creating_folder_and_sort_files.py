@@ -37,12 +37,12 @@ def regular_sort(path, config_cat):
     result_path = path_dir / folder_name
     final_path = result_path / file.name
     file_size = file.stat().st_size
-    file_modification_time = file.stat().st_mtime
+    file_timestamp = int(file.stat().st_mtime)
     
     if not result_path.is_dir():
       result_path.mkdir(parents=True, exist_ok=True)
     
-    writing_data_to_yml.result_message(file.name, file, final_path, "None", file_size, file_modification_time)
+    writing_data_to_yml.result_message(file, final_path, file.name, file_size, file_timestamp)
     
     shutil.move(file, final_path)
 
@@ -80,7 +80,7 @@ def check_and_move(path, file_path, config_cat):
   result_path = path_dir / folder_name
   final_path_filename = result_path / path_file.name
   file_size = path_file.stat().st_size
-  file_modification_time = path_file.stat().st_mtime
+  file_timestamp = int(path_file.stat().st_mtime)
   
   if final_path_filename.exists():
     count = 1
@@ -88,9 +88,9 @@ def check_and_move(path, file_path, config_cat):
       new_name = f"{path_file.stem}_{count}{path_file.suffix}"
       final_path_filename = result_path / new_name
       count += 1
-    writing_data_to_yml.result_message(path_file.name, path_file, final_path_filename, new_name, file_size, file_modification_time)
+    writing_data_to_yml.result_message(path_file, final_path_filename, new_name, file_size, file_timestamp)
   else:
-    writing_data_to_yml.result_message(path_file.name, path_file, final_path_filename, "None", file_size, file_modification_time)
+    writing_data_to_yml.result_message(path_file, final_path_filename, path_file.name, file_size, file_timestamp)
   
   if not result_path.is_dir():
     result_path.mkdir(parents=True, exist_ok=True)

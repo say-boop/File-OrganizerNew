@@ -9,3 +9,5 @@ deleting_folders: true
 
 # Путь до yml файла для записи об выполненных действиях.
 recording_comp_actions: "E:/work/All_Projects/File-OrganizerNew/config/recording_comp_actions.yml"
+
+passed_count: 0
