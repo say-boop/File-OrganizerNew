@@ -145,6 +145,7 @@ rules:
     - .bin
     - .run
     - .sh
+    - .dll
     destination: "Executables"
 
   - category: "Fonts"

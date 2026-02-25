@@ -3,6 +3,8 @@ import loading_config_files
 import shutil
 from logging_manager import LoggingManager
 from ruamel.yaml import YAML
+from tqdm import tqdm
+import sys
 
 
 CONFIG_RESET = loading_config_files.load_config_reset()
@@ -57,6 +59,14 @@ def moving_files(path_from_arr, path_to_arr, timestamp_file, passed_file, rollba
   if start_index >= end_index:
     return
   
+  progress_bar = tqdm(
+    total=(end_index - start_index),
+    desc="Copying",
+    file = sys.stdout,
+    miniters=1,
+    ascii=True
+  )
+  
   for i in range(start_index, end_index):
     if passed_file[i]:
       add_one_to_conf_set()
@@ -96,10 +106,13 @@ def moving_files(path_from_arr, path_to_arr, timestamp_file, passed_file, rollba
     try:
       if source_folder.exists() and len(list(source_folder.iterdir())) == 0:
         shutil.rmtree(source_folder)
-    except:
-      pass
+    except Exception as e:
+      logger_ERROR.error(f'Ошибка: {e}')
     
     add_one_to_conf_set()
+    progress_bar.update(1)
+  
+  progress_bar.close()
   
   CONFIG_SETTINGS = loading_config_files.load_config_settings()
   new_count = CONFIG_SETTINGS.get('passed_count', 0)
@@ -126,8 +139,8 @@ def add_one_to_conf_set(reset=False):
   
     with open(config_path, 'w', encoding='utf-8') as f:
       yaml.dump(data, f)
-  except:
-    pass
+  except Exception as e:
+    logger_ERROR.error(f'Ошибка: {e}')
 
 def delete_folder(folder_path):
   if folder_path.exists() and folder_path.is_dir():
@@ -172,8 +185,8 @@ def change_the_state_of_passed_file(filename):
     
     with open(config_path, 'w', encoding='utf-8') as f:
       yaml.dump(data, f)
-  except:
-    pass
+  except Exception as e:
+    logger_ERROR.error(f'Ошибка: {e}')
 
 def rollback_N_quantity():
   global CONFIG_SETTINGS
@@ -181,17 +194,19 @@ def rollback_N_quantity():
   current_count = CONFIG_SETTINGS.get('passed_count', 0)
   
   user_response = int(input('Произвести откат по количеству файлов? (1/0): '))
+  user_consent = int(input('Согласны откатить изменения? (1/0): '))
   
-  if user_response:
-    max_possible = len(passed_files) - current_count
-    number_files = int(input('Введите количество файлов для отката: '))
+  if user_consent:
+    if user_response:
+      max_possible = len(passed_files) - current_count
+      number_files = int(input('Введите количество файлов для отката: '))
     
-    if number_files > max_possible:
-      logger_INFO.info(f'Нельзя откатить больше чем {max_possible} файлов. Откатываем все оставшиеся')
-      number_files = max_possible
+      if number_files > max_possible:
+        logger_INFO.info(f'Нельзя откатить больше чем {max_possible} файлов. Откатываем все оставшиеся')
+        number_files = max_possible
     
-    moving_files(path_from, path_to, file_timestamp, passed_files, number_files)
-  else:
-    moving_files(path_from, path_to, file_timestamp, passed_files)
+      moving_files(path_from, path_to, file_timestamp, passed_files, number_files)
+    else:
+      moving_files(path_from, path_to, file_timestamp, passed_files)
 
 rollback_N_quantity()

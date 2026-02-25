@@ -3,6 +3,7 @@ import shutil
 import loading_config_files
 from logging_manager import LoggingManager
 import writing_data_to_yml
+from tqdm import tqdm
 
 
 logger_ERROR = LoggingManager.get_logger('error_logger')

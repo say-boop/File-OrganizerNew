@@ -16,14 +16,14 @@ filters:
 handlers:
   console: 
     class: logging.StreamHandler
-    level: INFO
+    level: ERROR
     formatter: simple
   
   file:
     class: logging.FileHandler
     level: DEBUG
     formatter: detailed
-    filename: ..\log\app.log
+    filename: ..\log\errors.log
     encoding: utf-8
     mode: a
   
@@ -37,7 +37,7 @@ handlers:
 
 loggers:
   only_info_console_logger:
-    level: ERROR
+    level: INFO
     filters: [only_info]
     handlers: [console]
     propagate: false
