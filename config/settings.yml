@@ -1,11 +1,13 @@
 # Какие папки сортировать
-watch_folder: "E:/work/All_Projects/File-OrganizerNew/test/test_folder"
+watch_folder: "E:/work/All_Projects/File-OrganizerNew/test/test_folder2"
 
 # Редим предпросмотра: true = только смотрим, false = реально перемещаем
 dry_run: true
 
-# Куда складывать отсортированное
-output_base: "E:/work/All_Projects/File-OrganizerNew/test/test_folder/sorted"
-
 # Удаление отсортированных папок: true - да, false - нет
 deleting_folders: true
+
+# Путь до yml файла для записи об выполненных действиях.
+recording_comp_actions: "E:/work/All_Projects/File-OrganizerNew/config/recording_comp_actions.yml"
+
+passed_count: 0

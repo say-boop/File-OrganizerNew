@@ -1,0 +1,57 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  simple:
+    format: "%(levelname)s: %(message)s"
+  
+  detailed:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+filters:
+  only_info:
+    '()': logging_filter.OnlyInfoFilter
+
+handlers:
+  console: 
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+  
+  file:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: detailed
+    filename: ..\log\app.log
+    encoding: utf-8
+    mode: a
+  
+  error:
+    class: logging.FileHandler
+    level: ERROR
+    formatter: detailed
+    filename: ..\log\errors.log
+    encoding: utf-8
+    mode: a
+
+loggers:
+  only_info_console_logger:
+    level: ERROR
+    filters: [only_info]
+    handlers: [console]
+    propagate: false
+
+  all_info_logger:
+    level: DEBUG
+    handlers: [file]
+    propagate: false
+  
+  error_logger:
+    level: WARNING
+    handlers: [file]
+    propagate: false
+
+root:
+  level: INFO
+  handlers: [file]

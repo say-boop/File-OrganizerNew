@@ -1,0 +1,35 @@
+file:
+  - filename: 'Microsoft Access База данных.accdb'
+    path_from: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Microsoft Access База данных.accdb'
+    path_to: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Database\Microsoft Access База данных.accdb'
+    file_size_before_B: '495616'
+    timestamp_before: '1771938688'
+    passed: true
+
+  - filename: 'Документ Microsoft Publisher.pub'
+    path_from: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Документ Microsoft Publisher.pub'
+    path_to: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Ebooks\Документ Microsoft Publisher.pub'
+    file_size_before_B: '59904'
+    timestamp_before: '1771938689'
+    passed: true
+
+  - filename: 'Лист Microsoft Excel.xlsx'
+    path_from: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Лист Microsoft Excel.xlsx'
+    path_to: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Spreadheets\Лист Microsoft Excel.xlsx'
+    file_size_before_B: '6570'
+    timestamp_before: '1771938740'
+    passed: true
+
+  - filename: 'Новый текстовый документ.txt'
+    path_from: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Новый текстовый документ.txt'
+    path_to: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Documents\Новый текстовый документ.txt'
+    file_size_before_B: '0'
+    timestamp_before: '1771938686'
+    passed: true
+
+  - filename: 'Презентация Microsoft PowerPoint.pptx'
+    path_from: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Презентация Microsoft PowerPoint.pptx'
+    path_to: 'E:\work\All_Projects\File-OrganizerNew\test\test_folder2\Presentations\Презентация Microsoft PowerPoint.pptx'
+    file_size_before_B: '0'
+    timestamp_before: '1771938737'
+    passed: true
