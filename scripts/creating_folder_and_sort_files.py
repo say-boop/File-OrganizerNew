@@ -4,7 +4,7 @@ import loading_config_files
 from logging_manager import LoggingManager
 import writing_data_to_yml
 from tqdm import tqdm
-
+import sys
 
 logger_ERROR = LoggingManager.get_logger('error_logger')
 logger_INFO = LoggingManager.get_logger('only_info_console_logger')
@@ -26,6 +26,14 @@ def regular_sort(path, config_cat):
   if not path_dir:
     logger_ERROR.error('The path is incorrect, check the configuration file, field "watch_folder"')
   
+  progress_bar = tqdm(
+    total=(len([f for f in path.iterdir()])),
+    desc="Copying",
+    file = sys.stdout,
+    miniters=1,
+    ascii=True
+  )
+  
   for path_file in path.iterdir():
     file = Path(path_file)
     extension = file.suffix
@@ -46,6 +54,10 @@ def regular_sort(path, config_cat):
     writing_data_to_yml.result_message(file, final_path, file.name, file_size, file_timestamp)
     
     shutil.move(file, final_path)
+    
+    progress_bar.update(1)
+  
+  progress_bar.close()
 
 
 def recursive_sort(path):
@@ -58,14 +70,28 @@ def recursive_sort(path):
   
   all_files = [f for f in base_path.rglob('*') if f.is_file()]
   
+  progress_bar = tqdm(
+    total=(len([f for f in path.iterdir()])),
+    desc="Copying",
+    file = sys.stdout,
+    miniters=1,
+    ascii=True
+  )
+  
   if len(all_files) == 0:
     logger_ERROR.error('There are no files to sort in the folder, check the path')
     return
   
   for file in all_files:
-    check_and_move(path, file, CONFIG_CATEGORIES)
+    check_and_move(path, file)
+    progress_bar.update(1)
+  
+  progress_bar.close()
+  
+  if CONFIG_SETTINGS.get("deleting_folders"):
+    delete_folder(base_path)
 
-def check_and_move(path, file_path, config_cat):
+def check_and_move(path, file_path):
   path_file = Path(file_path)
   path_dir = Path(path)
   
@@ -73,7 +99,7 @@ def check_and_move(path, file_path, config_cat):
     logger_ERROR.error('The path is incorrect, check the configuration file, field "watch_folder"')
   
   extension = path_file.suffix
-  folder_name = get_category_name(config_cat, extension)
+  folder_name = get_category_name(CONFIG_CATEGORIES, extension)
   if folder_name is None:
     logger_INFO.info(f'Category not found for {extension} extension')
     folder_name = "other"
@@ -98,24 +124,28 @@ def check_and_move(path, file_path, config_cat):
   
   
   shutil.move(path_file, final_path_filename)
-  
-  delete_folder(path_file.parent, path_dir)
 
-def delete_folder(folder, source_folder):
-  files_and_folders_count = len([f for f in folder.iterdir()])
-  
-  if files_and_folders_count == 0:
-    if not folder == source_folder:
-      if CONFIG_SETTINGS.get("deleting_folders"):
-        shutil.rmtree(folder)
+def delete_folder(base_path):
+  try:
+    for folder in sorted(base_path.rglob('*'), key=lambda x: str(x), reverse=True):
+      if folder.is_dir() and folder != base_path:
+        try:
+          contents = list(folder.iterdir())
+          if len(contents) == 0:
+            shutil.rmtree(folder)
+            logger_INFO.info(f'Deleted empty folder: {folder}')
+        except (PermissionError, FileNotFoundError) as e:
+          logger_ERROR.error(f'Error accessing folder {folder}: {e}')
+        except Exception as e:
+          logger_ERROR.error(f'Error deleting folder {folder}: {e}')
+  except Exception as e:
+    logger_ERROR.error(f'Error during folder cleanup: {e}')
 
-
-def get_category_name(config, target_ext):
-  for rule in config.get('rules', []):
+def get_category_name(conf_cat, target_ext):
+  for rule in conf_cat.get('rules', []):
     if target_ext in rule.get('extension', []):
       return rule.get('category')
   
-  logger_INFO.warning('No category found for this extension.')
   return None
 
 
