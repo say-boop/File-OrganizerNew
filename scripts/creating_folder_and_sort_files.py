@@ -147,6 +147,3 @@ def get_category_name(conf_cat, target_ext):
       return rule.get('category')
   
   return None
-
-
-recursive_sort(path)

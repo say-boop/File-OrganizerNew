@@ -208,5 +208,3 @@ def rollback_N_quantity():
       moving_files(path_from, path_to, file_timestamp, passed_files, number_files)
     else:
       moving_files(path_from, path_to, file_timestamp, passed_files)
-
-rollback_N_quantity()

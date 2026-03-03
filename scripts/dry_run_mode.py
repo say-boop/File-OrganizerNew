@@ -9,14 +9,9 @@ CONFIG_CATEGORIES = loading_config_files.load_config_categories()
 logger_ERROR = LoggingManager.get_logger('error_logger')
 logger_INFO = LoggingManager.get_logger('only_info_console_logger')
 
-dry_run_true = CONFIG_SETTINGS.get('dry_run')
 path = Path(CONFIG_SETTINGS.get('watch_folder'))
 
-def dry_run(conf_set, conf_cat, path):
-  if not dry_run_true:
-    logger_ERROR.error('Режим "dry-run" выключен, поменяйте значение в конфиге настроек')
-    return
-  
+def dry_run(conf_cat, path):
   list_file_path = file_enumerate(path)
   
   if list_file_path is None:
@@ -31,9 +26,9 @@ def dry_run(conf_set, conf_cat, path):
       logger_ERROR.error(f'Название категории для расширения {extension} не найдено, проверьте наличие расширения в нужной категории')
       return
     
-    logger_INFO.info(f'Берем файл {path_file.name}, перемещает его из {Path(path_file.parent)} в директорию {Path(path) / category_name}')
+    print(f'Берем файл {path_file.name}, перемещает его из {Path(path_file.parent)} в директорию {Path(path) / category_name}')
   
-  logger_INFO.info('Сортировка завершена')
+  print('Сортировка завершена')
 
 def get_category_name(conf_cat, extension):
   for rule in conf_cat.get('rules', []):
@@ -49,5 +44,3 @@ def file_enumerate(path):
     return None
   else:
     return result_list_file_path
-
-dry_run(CONFIG_SETTINGS, CONFIG_CATEGORIES, path)
