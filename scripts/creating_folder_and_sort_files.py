@@ -133,7 +133,6 @@ def delete_folder(base_path):
           contents = list(folder.iterdir())
           if len(contents) == 0:
             shutil.rmtree(folder)
-            logger_INFO.info(f'Deleted empty folder: {folder}')
         except (PermissionError, FileNotFoundError) as e:
           logger_ERROR.error(f'Error accessing folder {folder}: {e}')
         except Exception as e:

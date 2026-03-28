@@ -5,6 +5,10 @@ from logging_manager import LoggingManager
 from ruamel.yaml import YAML
 from tqdm import tqdm
 import sys
+import multiprocessing
+from multiprocessing import Pool
+from functools import partial
+import os
 
 
 CONFIG_RESET = loading_config_files.load_config_reset()
@@ -37,6 +41,22 @@ def get_info(config):
 
 get_info(CONFIG_RESET)
 
+def move_single_file(file_info, disk_size_full):
+  src = file_info['src']
+  dst = file_info['dst']
+  
+  checking_file_changes(src, file_info['timestamp'])
+  checking_dick_space(dst, disk_size_full)
+  
+  dst_path = Path(dst)
+  if not dst_path.parent.exists():
+    dst_path.parent.mkdir(parents=True, exist_ok=True)
+  
+  if Path(src).exists():
+    shutil.move(src, dst)
+    return True
+  return False
+
 def moving_files(path_from_arr, path_to_arr, timestamp_file, passed_file, rollback_N_quantity=None):
   global CONFIG_SETTINGS
   CONFIG_SETTINGS = loading_config_files.load_config_settings()
@@ -59,60 +79,49 @@ def moving_files(path_from_arr, path_to_arr, timestamp_file, passed_file, rollba
   if start_index >= end_index:
     return
   
-  progress_bar = tqdm(
-    total=(end_index - start_index),
-    desc="Copying",
-    file = sys.stdout,
-    miniters=1,
-    ascii=True
-  )
+  files_to_move = []
+  indexes_to_update = []
   
   for i in range(start_index, end_index):
     if passed_file[i]:
       add_one_to_conf_set()
       continue
-  
-    path_from = Path(path_from_arr[i])
-    path_to = Path(path_to_arr[i])
-    file_timestamp_before = int(timestamp_file[i])
-    nested_folder = path_from.parent
-  
-    if not path_to.exists():
-      logger_INFO.info(f'Файл {path_to} не найден')
+    
+    indexes_to_update.append(i)
+    
+    src_path = str(path_to_arr[i])
+    dst_path = str(path_from_arr[i])
+    timestamp = int(timestamp_file[i])
+    
+    if not Path(src_path).exists():
+      logger_INFO.info(f'Файл {src_path} не найден')
       add_one_to_conf_set()
       continue
     
-    checking_dick_space(path_from, disk_size_full)
-    checking_file_changes(path_to, file_timestamp_before)
+    files_to_move.append({
+      'src': src_path,
+      'dst': dst_path,
+      'timestamp': timestamp
+    })
+  
+  if files_to_move:
+    move_func = partial(move_single_file, disk_size_full=disk_size_full)
+
+    with Pool(processes=multiprocessing.cpu_count()) as pool:
+      for _ in tqdm(pool.imap_unordered(move_func, files_to_move), total=len(files_to_move), desc='Rollback', unit='File'):
+        pass
+  
+  for i in indexes_to_update:
+    add_one_to_conf_set()
+    change_the_state_of_passed_file(Path(path_to_arr[i]).name)
     
-    if path_from.exists():
-      counter = 1
-      temp_path_from = path_from
-      while temp_path_from.exists():
-        new_name = f"{path_from.stem}_{counter}{path_from.suffix}"
-        temp_path_from = path_from.parent / new_name
-        counter += 1
-      path_from = temp_path_from
-    
-    if not nested_folder.exists():
-      nested_folder.mkdir(parents=True, exist_ok=True)
-    
-    if path_to.exists():
-      shutil.move(str(path_to), str(path_from))
-    
-    change_the_state_of_passed_file(path_to.name)
-    
-    source_folder = path_to.parent
+    source_folder = Path(path_to_arr[i]).parent
     try:
       if source_folder.exists() and len(list(source_folder.iterdir())) == 0:
         shutil.rmtree(source_folder)
     except Exception as e:
-      logger_ERROR.error(f'Ошибка: {e}')
+      logger_ERROR.error(f'Ошибка {e}')
     
-    add_one_to_conf_set()
-    progress_bar.update(1)
-  
-  progress_bar.close()
   
   CONFIG_SETTINGS = loading_config_files.load_config_settings()
   new_count = CONFIG_SETTINGS.get('passed_count', 0)
